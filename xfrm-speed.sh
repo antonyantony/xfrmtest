@@ -9,6 +9,8 @@
 # local 172.16.1.200 remote 172.16.1.100
 # veth1 IP: 172.16.1.200, tunnel dev <type>11
 
+ciphers="clear gcm cbc null"
+
 function config_device {
 	ip netns add at_ns0
 	ip link add veth0 type veth peer name veth1
@@ -127,7 +129,7 @@ function setup_xfrm_tunnel {
 }
 
 function test_xfrm_tunnels {
-	for e in "clear" "gcm" "cbc" "null"
+	for e in ${ciphers}
 	do
 		setup_xfrm_tunnel ${e}
 		test_iperf "iperf-${e}.txt"
@@ -170,7 +172,7 @@ function gather_host_info {
 function summary {
 	set +ex
 	echo "CPUs $cpus ${model}"
-	for e in "clear" "gcm" "cbc" "null"
+	for e in ${ciphers}
 	do
 		if [ -n "iperf-${e}.txt" ]; then
 			tp=$(grep bits "iperf-${e}.txt")
