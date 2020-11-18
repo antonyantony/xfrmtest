@@ -10,6 +10,8 @@
 # veth1 IP: 172.16.1.200, tunnel dev <type>11
 
 ciphers="clear gcm cbc null"
+ciphers="gcm"
+PERF="perf stat -e task-clock,cycles,instructions,cache-references,cache-misses "
 
 function config_device {
 	ip netns add at_ns0
@@ -30,7 +32,7 @@ function test_iperf_server {
 
 function test_iperf {
 	outfile=$1
-	iperf -t 30 -c 172.16.1.100 | tee $outfile
+	${PERF} iperf -t 30 -c 172.16.1.100 | tee $outfile
 	tp=$(grep bits $outfile)
 	echo $tp
 }
