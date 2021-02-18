@@ -21,7 +21,7 @@ function config_device {
 	# ip netns exec at_ns0  ip route add 172.16.1.200 dev veth0 via 172.16.1.200 src 172.16.1.100
 }
 
-function test_iperf_server {
+function start_iperf_server {
 	ip netns exec at_ns0 iperf -s &
 	serverpid=$!
 }
@@ -126,7 +126,7 @@ function setup_xfrm_tunnel {
 		mode tunnel
 }
 
-function test_xfrm_tunnels {
+function start_xfrm_tunnels {
 	for e in "clear" "gcm" "cbc" "null"
 	do
 		setup_xfrm_tunnel ${e}
@@ -184,8 +184,8 @@ echo "Testing IPsec tunnel..."
 cleanup
 gather_host_info
 config_device
-test_iperf_server
-test_xfrm_tunnels
+start_iperf_server
+start_xfrm_tunnels
 summary
 cleanup 2>/dev/null
 echo "*** PASS ***"
