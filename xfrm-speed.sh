@@ -68,7 +68,7 @@ function setup_xfrm_tunnel {
 
 	ipxs="ip netns exec at_ns0 \
 		ip xfrm state add src 172.16.1.100 dst 172.16.1.200 proto esp \
-			spi $spi_in_to_out reqid 1 mode tunnel ${enc} "
+			spi $spi_in_to_out replay-window 1 flag esn reqid 1 mode tunnel ${enc} "
 
 	# this if is ugly I do not know how to pass empty enckey to ip x s add
 	if  [ "${e}" == "null" ]; then
@@ -84,7 +84,8 @@ function setup_xfrm_tunnel {
 	# out -> in
 	ipxs="ip netns exec at_ns0 \
 		ip xfrm state add src 172.16.1.200 dst 172.16.1.100 proto esp \
-			spi $spi_out_to_in reqid 2 mode tunnel ${enc} "
+			spi $spi_out_to_in reqid 2 mode tunnel ${enc} " replay-window
+ 0 flag esn
 
 	# this if is ugly I do not know how to pass empty enckey to ip x s add
 	if  [ "${e}" == "null" ]; then
@@ -101,7 +102,8 @@ function setup_xfrm_tunnel {
 	# out of namespace
 	# in -> out
 	ipxs="ip xfrm state add src 172.16.1.100 dst 172.16.1.200 proto esp \
-		spi $spi_in_to_out reqid 1 mode tunnel ${enc}"
+		spi $spi_in_to_out reqid 1 mode tunnel ${enc}" replay-window
+ 0 flag esn
 
 	# this if is ugly I do not know how to pass empty enckey to ip x s add
 	if  [ "${e}" == "null" ]; then
@@ -114,7 +116,8 @@ function setup_xfrm_tunnel {
 		mode tunnel
 	# out -> in
 	ipxs="ip xfrm state add src 172.16.1.200 dst 172.16.1.100 proto esp \
-		spi $spi_out_to_in reqid 2 mode tunnel ${enc}"
+		spi $spi_out_to_in reqid 2 mode tunnel ${enc}" replay-window
+ 0 flag esn
 	# this if is ugly I do not know how to pass empty enckey to ip x s add
 	if  [ "${e}" == "null" ]; then
 		$(${ipxs} "")
@@ -127,14 +130,14 @@ function setup_xfrm_tunnel {
 }
 
 function start_xfrm_tunnels {
-	for e in "clear" "gcm" "cbc" "null"
+	for e in "gcm"
 	do
 		setup_xfrm_tunnel ${e}
-		test_iperf "iperf-${e}.txt"
+		# test_iperf "iperf-${e}.txt"
 		if [ "${e}"  != "clear" ]; then
 			ip xfrm s | grep seq
 			ip netns exec at_ns0  ip xfrm s | grep seq
-			cleanup_xfrm
+			# cleanup_xfrm
 		fi
 	done
 }
@@ -187,5 +190,5 @@ config_device
 start_iperf_server
 start_xfrm_tunnels
 summary
-cleanup 2>/dev/null
+#cleanup 2>/dev/null
 echo "*** PASS ***"
